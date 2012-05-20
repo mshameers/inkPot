@@ -5,7 +5,10 @@ from writeAreaUi import Ui_Form
 from write import Write
 from writeWidget import WriteSet
 from setWriteUi import Ui_Dialog
+from monCalDlgUi import Ui_monCalDlg
 
+POINTSPATH = "points"
+#edited
 #class Pixmap for an alphabet , to be called by charViewFun
 class Pixmap(QObject):
     def __init__(self, pix):
@@ -35,17 +38,20 @@ class Main(QWidget):
 		self.writeUi.setupUi(self)
 
 #some initializations		
-		self.langName = 'Malayalam'										
+		self.langName = 'Latin'										
 		self.tempNum = 0
 		self.name = ['self.zero','self.one','self.two','self.three','self.four','self.five','self.six','self.seven','self.eight','self.nine','self.ten']
 #connect gui widgets
 		self.writeUi.languageComboBox.activated.connect(self.languageSelect)	
 		self.writeUi.clearButton.clicked.connect(self.clear)
+		self.writeUi.setButton.clicked.connect(self.settings)
+		
 		self.writeUi.quitButton.clicked.connect(self.appQuit)
 		self.writeUi.charshowBut.clicked.connect(self.charShow)
 		
 		#self.updatesEnabled()
-#get the screen width and height		
+#get the screen width and height
+		Write.app = app
 		Write.appWidth = width											
 		Write.appheight = height
 		WriteSet.appWidth = width
@@ -60,8 +66,8 @@ class Main(QWidget):
 #refresh characters folder for new characters		
 		for files in os.listdir('character/'):							
 			os.remove('character/'+files)
-#update characters folder with malayalam			
-		self.characterfun(3330,3435)									
+#update characters folder with English
+		self.characterfun(65,112)									
 #the characters showing widget setup		
 		self.charView = QGraphicsView(self.writeUi.bottomFrame)
 		self.charView.setMinimumHeight(height/4)
@@ -77,7 +83,7 @@ class Main(QWidget):
 			self.scriptList = [QFontDatabase.writingSystemName(self.scripts[i]),]
 			self.scrlist.append(self.scriptList)
 			self.writeUi.languageComboBox.addItems(self.scriptList)
-			self.writeUi.languageComboBox.setCurrentIndex(11)
+			#self.writeUi.languageComboBox.setCurrentIndex(11)
 			i += 1
 		self.update()
 		
@@ -114,6 +120,7 @@ class Main(QWidget):
 				index = line.find('-'+str(self.charIndex)+',')
 				self.widget.filePath = filePath
 				if index != -1 and index< 2:
+					Write.lineNo = line[1:line.find(',')]
 					for i, item in enumerate(evalvedLine[1:]):
 						if i == 0:
 							self.widget.iconShow(str(i),'image/'+str(i)+'blue.png',item)
@@ -125,7 +132,6 @@ class Main(QWidget):
 			else:
 #open a dialog for getting points
 				self.dlg = QDialog()
-				
 				self.dlg.setFixedSize(width/2+60,height/2)
 				self.showWindow = Ui_Dialog()
 				self.showWindow.setupUi(self.dlg)
@@ -285,6 +291,25 @@ class Main(QWidget):
 		for i in range (1,len(self.widget.swapNames)):
 			self.widget.swapNames[i].setPixmap(QPixmap('image/'+str(i)+'orange.png').scaled(35,35,Qt.KeepAspectRatioByExpanding))
 		self.update()
+		
+	def settings(self):
+		self.setDlg = QDialog()
+		self.setWindow = Ui_monCalDlg()
+		self.setWindow.setupUi(self.setDlg)
+		try:
+			with open(POINTSPATH+"/Adjust.txt","r") as b_file:
+				horAdjust = int(b_file.readline())
+				verAdjust = int(b_file.readline())
+		except:
+				horAdjust = 0
+				verAdjust = 0
+		self.setWindow.horizontalSlider.setValue(horAdjust)
+		self.setWindow.horizontalSlider_2.setValue(verAdjust)
+		if self.setDlg.exec_():
+			with open(POINTSPATH+"/Adjust.txt","w") as a_file:
+				a_file.writelines(str(self.setWindow.horizontalSlider.value())+"\n"),
+				#a_file.write('/n')
+				a_file.writelines(str(self.setWindow.horizontalSlider_2.value()))
 #function to swap a dict key value pair		
 	def swap_dic(self,dic):
 		return dict((v, k) for (k, v) in dic.items())
@@ -317,6 +342,8 @@ class Main(QWidget):
 			pixmap.save(osPath+str(i)+circle+".png" )
 			painter.end()
 			i+=1
+			
+		
 if __name__ == "__main__":
 	
     app = QApplication(sys.argv)

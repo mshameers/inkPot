@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+POINTSPATH = "points/Adjust.txt"
+
 from PyQt4 import QtCore, QtGui
 
 class WriteSet(QtGui.QWidget):
@@ -27,6 +29,13 @@ class WriteSet(QtGui.QWidget):
 		self.checkValue = set(['1', '3', '2', '5', '4'])
 		self.temp = 0
 		self.ok = 0
+		try:
+			with open(POINTSPATH,"r") as a_file:
+				self.horAdjust = int(a_file.readline())
+				self.verAdjust = int(a_file.readline())
+		except:
+				self.horAdjust = 0
+				self.verAdjust = 0
 
 #display the point 
 	def iconShow(self,name,png,wid):
@@ -79,7 +88,8 @@ class WriteSet(QtGui.QWidget):
 			newIcon.move(event.pos() - offset)
 			newIcon.show()
 			newIcon.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-			self.pointPos[self.childAtpos] = (event.pos().x()*2-12,event.pos().y()*2-72)
+			self.pointPos[self.childAtpos] = (event.pos().x()*2+self.horAdjust,event.pos().y()*2+self.verAdjust) #POINTS ON SCREEN ADJUSTMENT
+			#self.pointPos[self.childAtpos] = (event.pos().x()*2-12,event.pos().y()*2-72) #POINTS ON SCREEN ADJUSTMENT
 			if event.source() == self:
 				position = QtCore.QPoint( event.pos().x(),  event.pos().y())
 				self.positions.append(position)
