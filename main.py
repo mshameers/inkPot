@@ -27,7 +27,9 @@ class Main(QWidget):
 
 #characters store		
 		try:	
-			os.mkdir('character',0700)									
+			os.mkdir('character',0700)
+			os.mkdir('points',0700)									
+
 			self.createPointfun("orange")
 			self.createPointfun("blue")
 		except:
